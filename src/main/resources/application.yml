@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: deviceApi
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${DB_USER:myuser}
+    password: ${DB_PASS:mypassword}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+logging:
+  level:
+    org.springframework.boot.web: DEBUG

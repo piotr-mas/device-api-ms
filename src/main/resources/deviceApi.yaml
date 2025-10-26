@@ -1,0 +1,235 @@
+openapi: 3.1.0
+info:
+  title: Device API
+  description: Handle network deployment
+  version: 1.0.0
+servers:
+  - url: https://{server-url}/api/v1/
+    variables:
+      server-url:
+        default: "localhost:8082"
+paths:
+  /devices:
+    post:
+      summary: Register a new device
+      description: Registers a device in the network deployment.
+      operationId: registerDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterDeviceResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    get:
+      summary: Get all devices
+      description: Returns all registered devices
+      operationId: getAllDevices
+      responses:
+        '200':
+          description: List of all devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegisterDeviceResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /devices/{macAddress}:
+    get:
+      parameters:
+        - name: macAddress
+          in: path
+          required: true
+          description: MAC address of device
+          schema:
+            $ref: '#/components/schemas/MacAddressObject'
+      summary: Get device by MAC address
+      description: Returns a single device by MAC address
+      operationId: getDeviceByMac
+      responses:
+        '200':
+          description: Device found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterDeviceResponse'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /devices/topology:
+    get:
+      summary: Get Full Network Topology
+      description: Returns the full device topology as a tree. Each node is a MAC address, and children are devices connected via uplink.
+      responses:
+        '200':
+          description: Full Network Topology
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopologyResponse'
+        '404':
+          description: Topology not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /devices/topology/{macAddress}:
+    get:
+      parameters:
+        - name: macAddress
+          in: path
+          required: true
+          description: MAC address for a root node
+          schema:
+            $ref: '#/components/schemas/MacAddressObject'
+      summary: Get Network Topology for device
+      description: Returns the device topology for a root as a tree. Each node is a MAC address, and children are devices connected via uplink.
+      responses:
+        '200':
+          description: Network Topology
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopologyNodeResponse'
+        '404':
+          description: Topology not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+
+components:
+  schemas:
+
+    DeviceType:
+      type: string
+      enum:
+        - gateway
+        - switch
+        - accessPoint
+      description: Valid type of network device
+
+    MacAddressObject:
+      type: string
+      format: mac
+      pattern: '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+      example: '00:1A:2B:3C:4D:5E'
+
+    RegisterDeviceRequest:
+      type: object
+      properties:
+        deviceType:
+          $ref: '#/components/schemas/DeviceType'
+        macAddress:
+          $ref: '#/components/schemas/MacAddressObject'
+          description: Device MAC address
+        uplinkMacAddress:
+          oneOf:
+            - $ref: '#/components/schemas/MacAddressObject'
+            - type: 'null'
+          description: Another device MAC address to attach to this device
+      required:
+        - deviceType
+        - macAddress
+
+    RegisterDeviceResponse:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              format: UUID
+              example:
+                550e8400-e29b-41d4-a716-446655440000:
+          required:
+            - id
+        - $ref: '#/components/schemas/RegisterDeviceRequest'
+
+    TopologyNodeResponse:
+      type: object
+      description: A node in the network topology tree
+      properties:
+        macAddress:
+          $ref: '#/components/schemas/MacAddressObject'
+        children:
+          type: array
+          description: A list of devices connected to this device (its children).
+          items:
+            $ref: '#/components/schemas/TopologyNodeResponse' # This is the recursive reference, making it a tree structure
+      required:
+        - macAddress
+
+    TopologyResponse:
+      type: array
+      description: The root of the network topology tree, typically a list of gateway-level devices.
+      items:
+        $ref: '#/components/schemas/TopologyNodeResponse'
+
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
