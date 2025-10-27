@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: device-api-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: device-user
+      POSTGRES_PASSWORD: device-password
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks:
+      - device-net
+
+  ms-device-api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: device-api-image
+    container_name: device-api-container
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/postgres
+      DB_USER: device-user
+      DB_PASS: device-password
+    #volumes:
+    #  - /mnt/c/Users/piotr/IdeaProjects/EisenhowerMatrix/User/src/main/resources/ssl:/app/ssl:ro
+    networks:
+      - device-net
+
+      
+volumes:
+  pgdata:
+
+networks:
+  device-net:

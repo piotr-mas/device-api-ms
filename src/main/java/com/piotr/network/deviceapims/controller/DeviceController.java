@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class DeviceController implements DevicesApi {
@@ -27,10 +26,8 @@ public class DeviceController implements DevicesApi {
 
     @Override
     public ResponseEntity<TopologyNodeResponse> devicesTopologyMacAddressGet(String macAddress) {
-        Optional<TopologyNodeResponse> result = deviceService.getTopologyNode(macAddress);
-        return result
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        var result = deviceService.getTopologyNode(macAddress);
+        return ResponseEntity.ok(result);
     }
 
     @Override
@@ -41,10 +38,8 @@ public class DeviceController implements DevicesApi {
 
     @Override
     public ResponseEntity<RegisterDeviceResponse> getDeviceByMac(String macAddress) {
-        Optional<RegisterDeviceResponse> result = deviceService.getDeviceByMac(macAddress);
-        return result
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        var result = deviceService.getDeviceByMac(macAddress);
+        return ResponseEntity.ok(result);
     }
 
     @Override

@@ -9,14 +9,12 @@ FROM eclipse-temurin:21-jdk
 # Set working directory
 WORKDIR /app
 # Copy the built JAR file into the container
-COPY --from=builder /app/target/*.jar deviceApi.jar
-# Copy SSL files into the runtime container
-COPY src/main/resources/ssl/ /app/ssl/
+COPY --from=builder /app/target/*.jar device-api-ms-0.0.1-SNAPSHOT.jar
 
 # Expose the internal port your app runs on
-EXPOSE 8081
+EXPOSE 8080
 
 LABEL authors="piotr"
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "deviceApi.jar"]
+ENTRYPOINT ["java", "-jar", "device-api-ms-0.0.1-SNAPSHOT.jar"]

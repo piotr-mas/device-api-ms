@@ -1,6 +1,6 @@
 package com.piotr.network.deviceapims.exception;
 
-import lombok.Data;
+
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 public class InvalidRequestException extends RuntimeException {
 
     private final HttpStatus  status;
+    private final String      message;
 
-    public InvalidRequestException(HttpStatus status) {
+    public InvalidRequestException(HttpStatus status, String message) {
         this.status = status;
+        this.message = message;
     }
 }
