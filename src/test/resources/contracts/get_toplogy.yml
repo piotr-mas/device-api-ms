@@ -1,0 +1,13 @@
+description: Should return network topology
+request:
+  method: GET
+  url: /devices/topology
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    - macAddress: "70:1A:2B:3C:4D:5E"
+      children:
+        - macAddress: "AA:BB:CC:DD:EE:FF"
+          children: []

@@ -84,6 +84,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-contract-verifier</artifactId>
+            <version>4.3.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -173,6 +179,15 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-contract-maven-plugin</artifactId>
+                <version>4.3.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <baseClassForTests>com.piotr.network.deviceapims.contract.ContractTest</baseClassForTests>
+                </configuration>
             </plugin>
         </plugins>
     </build>

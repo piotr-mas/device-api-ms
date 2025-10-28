@@ -1,0 +1,17 @@
+description: Should return network topology for requested MAC address
+request:
+  method: GET
+  url: /devices/topology/AA:BB:CC:DD:EE:FF
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    macAddress: "AA:BB:CC:DD:EE:FF"
+    children: []
+matchers:
+  response:
+    body:
+      - path: $.macAddress
+        type: by_equality
+        value: "AA:BB:CC:DD:EE:FF"

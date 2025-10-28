@@ -1,0 +1,18 @@
+description: Should register a new device
+request:
+  method: POST
+  url: /devices
+  headers:
+    Content-Type: application/json
+  body:
+    macAddress: "1A:BB:CC:DD:EE:FF"
+    deviceType: "accessPoint"
+    uplinkMacAddress: "70:1A:2B:3C:4D:5E"
+response:
+  status: 201
+  headers:
+    Content-Type: application/json
+  body:
+    macAddress: "1A:BB:CC:DD:EE:FF"
+    deviceType: "accessPoint"
+    uplinkMacAddress: "70:1A:2B:3C:4D:5E"

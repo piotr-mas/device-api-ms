@@ -4,12 +4,17 @@ import com.piotr.network.deviceapims.generated.model.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Optional;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final String FAILED_VALIDATION = "Validation failed";
 
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(InvalidRequestException exception) {
@@ -18,12 +23,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(MethodArgumentNotValidException exception) {
-        var errorMessage = exception.getBindingResult().getFieldErrors().stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .findFirst()
-                .orElse("Validation failed.");
-        var errorResponse = new ErrorResponse(exception.getStatusCode().toString(), errorMessage);
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        String errorMessage = Optional.ofNullable(exception)
+                .map(MethodArgumentNotValidException::getBindingResult)
+                .map(Errors::getFieldErrors)
+                .filter(fieldErrors -> !fieldErrors.isEmpty())
+                .map(fieldErrors -> fieldErrors.stream()
+                        .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                        .findFirst()
+                        .orElse(FAILED_VALIDATION))
+                .orElse(FAILED_VALIDATION);
+        var statusCode = exception != null ? exception.getStatusCode().toString() : "400";
+        var errorResponse = new ErrorResponse(statusCode, errorMessage);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -32,7 +43,7 @@ public class GlobalExceptionHandler {
         var errorMessage = exception.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .findFirst()
-                .orElse("Validation failed.");
+                .orElse(FAILED_VALIDATION);
 
         // Map it to your OpenAPI ErrorResponse model
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), errorMessage);

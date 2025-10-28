@@ -1,0 +1,11 @@
+description: Should return all registered devices
+request:
+  method: GET
+  url: /devices
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    - macAddress: "70:1A:2B:3C:4D:5E"
+      deviceType: "gateway"
