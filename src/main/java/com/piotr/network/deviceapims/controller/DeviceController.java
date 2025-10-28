@@ -6,11 +6,13 @@ import com.piotr.network.deviceapims.generated.model.RegisterDeviceResponse;
 import com.piotr.network.deviceapims.generated.model.TopologyNodeResponse;
 import com.piotr.network.deviceapims.service.DeviceService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@Validated
 public class DeviceController implements DevicesApi {
 
     private final DeviceService deviceService;
