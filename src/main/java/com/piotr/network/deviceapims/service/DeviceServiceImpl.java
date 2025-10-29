@@ -8,9 +8,11 @@ import com.piotr.network.deviceapims.generated.model.RegisterDeviceResponse;
 import com.piotr.network.deviceapims.generated.model.TopologyNodeResponse;
 import com.piotr.network.deviceapims.mapper.DeviceMapper;
 import com.piotr.network.deviceapims.repository.DeviceRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -37,10 +39,11 @@ public class DeviceServiceImpl implements DeviceService {
 
     /**
      * Registering a device to a network deployment
-     * @param dto
-     * @return
+     * @param dto the data transfer object containing user input for processing
+     * @return the data transfer object
      */
     @Override
+    @Transactional
     public RegisterDeviceResponse registerDevice(RegisterDeviceRequest dto) {
         var entity = mapper.mapDeviceDtoToDeviceEntity(dto);
         var parentMac = dto.getUplinkMacAddress();
@@ -55,7 +58,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     /**
      * Retrieving all registered devices, sorted by device type
-     * @return
+     * @return the List of data transfer object
      */
     @Override
     public List<RegisterDeviceResponse> getDevices() {
@@ -74,8 +77,8 @@ public class DeviceServiceImpl implements DeviceService {
 
     /**
      * Retrieving network deployment device by MAC address
-     * @param macAddress
-     * @return
+     * @param macAddress the String object containing user input (MAC Address) for processing
+     * @return the data transfer object
      */
     @Override
     public RegisterDeviceResponse getDeviceByMac(String macAddress) {
@@ -87,9 +90,10 @@ public class DeviceServiceImpl implements DeviceService {
 
     /**
      * Retrieving all registered network device topology as tree structure
-     * @return
+     * @return the List of data transfer object
      */
     @Override
+    @Transactional(readOnly = true)
     public List<TopologyNodeResponse> getTopologyNodes() {
         var rootNodeEntities = deviceRepository.findByUplinkDeviceIsNull();
         if  (rootNodeEntities.isEmpty()) {
@@ -100,7 +104,13 @@ public class DeviceServiceImpl implements DeviceService {
                 .toList();
     }
 
+    /**
+     * Retrieving registered network device topology as tree structure for parent node
+     * @param macAddress the String object containing user input (MAC Address) for processing
+     * @return the data transfer object
+     */
     @Override
+    @Transactional(readOnly = true)
     public TopologyNodeResponse getTopologyNode(String macAddress) {
         var parent = deviceRepository.findByMacAddress(macAddress)
                 .orElseThrow(() -> new InvalidRequestException(HttpStatus.NOT_FOUND, "Topology with device MAC "+ macAddress + NOT_FOUND));
@@ -109,8 +119,8 @@ public class DeviceServiceImpl implements DeviceService {
 
     /**
      * Recursively builds the TopologyNodeResponse tree structure.
-     * @param parentEntity
-     * @return
+     * @param parentEntity the data transfer object containing user input for processing
+     * @return the data transfer object
      */
     private TopologyNodeResponse buildTopologyTreeResponse(DeviceEntity parentEntity) {
         TopologyNodeResponse topologyNodeResponse = mapper.mapEntityToTopologyNodeResponse(parentEntity);
