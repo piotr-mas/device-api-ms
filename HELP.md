@@ -1,5 +1,10 @@
 # Getting Started
 
+## How to run program
+If you have docker desktop, run bellow command from root directory (docker-compose)
+
+docker-compose up --build -d ms-device-api
+
 ### Reference Documentation
 
 For further reference, please consider the following sections:

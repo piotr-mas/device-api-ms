@@ -1,9 +1,9 @@
 package com.piotr.network.deviceapims.entity;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.piotr.network.deviceapims.generated.model.DeviceType;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@JsonPropertyOrder({"id", "deviceType", "macAddress"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DeviceEntity {
     @Id
     @UuidGenerator
@@ -21,6 +21,7 @@ public class DeviceEntity {
     private DeviceType deviceType;
 
     @Column(unique = true)
+    @EqualsAndHashCode.Include
     private String macAddress;
 
     //Parent

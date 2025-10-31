@@ -2,10 +2,7 @@ package com.piotr.network.deviceapims.service;
 
 import com.piotr.network.deviceapims.entity.DeviceEntity;
 import com.piotr.network.deviceapims.exception.InvalidRequestException;
-import com.piotr.network.deviceapims.generated.model.DeviceType;
-import com.piotr.network.deviceapims.generated.model.RegisterDeviceRequest;
-import com.piotr.network.deviceapims.generated.model.RegisterDeviceResponse;
-import com.piotr.network.deviceapims.generated.model.TopologyNodeResponse;
+import com.piotr.network.deviceapims.generated.model.*;
 import com.piotr.network.deviceapims.mapper.DeviceMapper;
 import com.piotr.network.deviceapims.repository.DeviceRepository;
 
@@ -53,7 +50,7 @@ public class DeviceServiceImpl implements DeviceService {
             entity.setUplinkDevice(parent);
         }
         var entityResult = deviceRepository.save(entity);
-        return mapper.mapDeviceEntityToDeviceResponse(entityResult);
+        return mapper.mapDeviceEntityToRegisterDeviceResponse(entityResult);
     }
 
     /**
@@ -61,7 +58,7 @@ public class DeviceServiceImpl implements DeviceService {
      * @return the List of data transfer object
      */
     @Override
-    public List<RegisterDeviceResponse> getDevices() {
+    public List<DeviceResponse> getDevices() {
         var allDevices = deviceRepository.findAll();
         if  (allDevices.isEmpty()) {
             throw new InvalidRequestException(HttpStatus.NOT_FOUND, "No device(s) found");
@@ -81,7 +78,7 @@ public class DeviceServiceImpl implements DeviceService {
      * @return the data transfer object
      */
     @Override
-    public RegisterDeviceResponse getDeviceByMac(String macAddress) {
+    public DeviceResponse getDeviceByMac(String macAddress) {
         return deviceRepository.findByMacAddress(macAddress)
                 .map(mapper::mapDeviceEntityToDeviceResponse)
                 .orElseThrow(() -> new InvalidRequestException(HttpStatus.NOT_FOUND, "Device with MAC "+ macAddress + NOT_FOUND));
@@ -105,13 +102,13 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     /**
-     * Retrieving registered network device topology as tree structure for parent node
+     * Retrieving registered network device topology starting from a specific device
      * @param macAddress the String object containing user input (MAC Address) for processing
      * @return the data transfer object
      */
     @Override
     @Transactional(readOnly = true)
-    public TopologyNodeResponse getTopologyNode(String macAddress) {
+    public TopologyNodeResponse getTopologyNodeByMac(String macAddress) {
         var parent = deviceRepository.findByMacAddress(macAddress)
                 .orElseThrow(() -> new InvalidRequestException(HttpStatus.NOT_FOUND, "Topology with device MAC "+ macAddress + NOT_FOUND));
         return buildTopologyTreeResponse(parent);

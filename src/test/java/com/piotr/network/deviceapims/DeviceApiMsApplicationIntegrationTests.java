@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class DeviceApiMsApplicationTests {
+class DeviceApiMsApplicationIntegrationTests {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -90,17 +90,16 @@ class DeviceApiMsApplicationTests {
                 .setBlank(field(DeviceEntity::getUplinkDevice))
                 .setBlank(field(DeviceEntity::getId))
                 .create();
-        var persistedEntity = deviceRepository.save(entity);
+        deviceRepository.save(entity);
         //call the API endpoint
-        ResponseEntity<RegisterDeviceResponse> response = restTemplate.getForEntity("/devices/mac/"+macAddress,
-                RegisterDeviceResponse.class, macAddress);
+        ResponseEntity<DeviceResponse> response = restTemplate.getForEntity("/devices/mac/"+macAddress,
+                DeviceResponse.class, macAddress);
         //assertion
         var body =  response.getBody();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertNotNull(body);
         assertThat(body.getDeviceType()).isEqualTo(DeviceType.GATEWAY);
         assertThat(body.getMacAddress()).isEqualTo(macAddress);
-        assertThat(body.getId()).isEqualTo(persistedEntity.getId());
     }
 
     @Test
@@ -125,9 +124,9 @@ class DeviceApiMsApplicationTests {
                 .setBlank(field(DeviceEntity::getUplinkDevice))
                 .setBlank(field(DeviceEntity::getId))
                 .create();
-        var persistedEntity = deviceRepository.save(entity);
+        deviceRepository.save(entity);
         //call the API endpoint
-        ResponseEntity<List<RegisterDeviceResponse>> response = restTemplate.exchange("/devices", HttpMethod.GET,
+        ResponseEntity<List<DeviceResponse>> response = restTemplate.exchange("/devices", HttpMethod.GET,
                 HttpEntity.EMPTY,
                 new ParameterizedTypeReference<>() {});
         //assertion
@@ -135,9 +134,9 @@ class DeviceApiMsApplicationTests {
         var body =  response.getBody();
         assertNotNull(body);
         assertEquals(1, body.size());
+        assertNotNull(body.get(0).getDeviceType());
         assertThat(body.get(0).getDeviceType().getValue()).isEqualTo(DeviceType.GATEWAY.getValue());
         assertThat(body.get(0).getMacAddress()).isEqualTo(macAddress);
-        assertThat(body.get(0).getId()).isEqualTo(persistedEntity.getId());
     }
 
     @Test

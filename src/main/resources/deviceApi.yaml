@@ -52,7 +52,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RegisterDeviceResponse'
+                  $ref: '#/components/schemas/DeviceResponse'
         '400':
           description: Invalid request
           content:
@@ -84,7 +84,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegisterDeviceResponse'
+                $ref: '#/components/schemas/DeviceResponse'
         '404':
           description: Device not found
           content:
@@ -201,6 +201,15 @@ components:
           required:
             - id
         - $ref: '#/components/schemas/RegisterDeviceRequest'
+
+    DeviceResponse:
+      type: object
+      description: Device entry, which consists of deviceType and macAddress
+      properties:
+        deviceType:
+          $ref: '#/components/schemas/DeviceType'
+        macAddress:
+          $ref: '#/components/schemas/MacAddressObject'
 
     TopologyNodeResponse:
       type: object
